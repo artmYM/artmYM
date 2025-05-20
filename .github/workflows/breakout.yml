@@ -1,0 +1,40 @@
+name: GitHub Breakout Game
+
+on:
+  schedule:
+    # run every midnight UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:    # manual trigger button
+  push:                 # rebuild when main changes
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: ➜  Checkout repository
+        uses: actions/checkout@v3
+
+      - name: ➜  Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: ➜  Install dependencies
+        run: npm ci                  # or pnpm install / yarn install
+
+      - name: ➜  Generate Breakout HTML
+        run: node scripts/generateBreakout.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GraphQL auth
+          GITHUB_USER:   ${{ github.repository_owner }}
+
+      - name: ➜  Publish `dist/` to the `output` branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token:   ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:    ./dist
+          publish_branch: output
+          commit_message: "chore: update Breakout game [skip ci]"
