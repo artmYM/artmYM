@@ -1,0 +1,11 @@
+{
+  "name": "github-breakout-generator",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/generateBreakout.mjs"
+  },
+  "dependencies": {
+    "graphql-request": "^6.0.0"
+  }
+}
