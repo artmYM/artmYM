@@ -1,0 +1,5 @@
+# Node artefacts
+node_modules/
+dist/
+# misc
+.DS_Store
