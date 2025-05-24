@@ -61,8 +61,7 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);
 await fs.mkdir("dist", { recursive: true });
 await fs.writeFile("dist/breakout.html", html, "utf8");
 
-/* ── 3. GIF output ───────────────────────────────────────────────── */
-/* ── 3. GIF output ───────────────────────────────────────────────── */
+/* ── 3. GIF output ──────────────────────────────────────────────── */
 const CELL = 12, GAP = 2, R = 5;
 const W = cols * (CELL + GAP) - GAP;
 const H = rows * (CELL + GAP) - GAP + 60;
@@ -70,25 +69,46 @@ const H = rows * (CELL + GAP) - GAP + 60;
 const canvas = createCanvas(W, H);
 const ctx    = canvas.getContext("2d");
 const enc    = new GIFEncoder(W, H);
-enc.start(); enc.setRepeat(0); enc.setDelay(8); enc.setQuality(10);
+enc.start();
+enc.setRepeat(0);      // loop forever
+enc.setDelay(10);      // 10 ms → 100 fps (minimum reliable delay)
+enc.setQuality(12);    // bigger number = smaller file; 10→8 000f ≈ 14 MB
 
 const pad2  = { w: 60, h: 10, x: W / 2 - 30, y: H - 30, s: 4 };
-const ball2 = { x: W / 2, y: H - 60, r: R, vx: 3, vy: -3 };
+const ball2 = { x: W / 2, y: H - 60, r: R, vx: 4, vy: -4 };   // ↑ speed a bit
 const bricks2 = grid.map(r => r.slice());
 
-function step2(){ball2.x+=ball2.vx;ball2.y+=ball2.vy;
-  if(ball2.x<R||ball2.x>W-R)ball2.vx*=-1;if(ball2.y<R)ball2.vy*=-1;if(ball2.y>H){ball2.x=W/2;ball2.y=H-60;ball2.vx=Math.random()>.5?3:-3;ball2.vy=-3;}
-  pad2.x+=Math.sign(ball2.x-(pad2.x+pad2.w/2))*pad2.s;pad2.x=Math.max(0,Math.min(W-pad2.w,pad2.x));
-  if(ball2.y+R>pad2.y&&ball2.x>pad2.x&&ball2.x<pad2.x+pad2.w)ball2.vy=-Math.abs(ball2.vy);
-  const c=Math.floor(ball2.x/(CELL+GAP)),r=Math.floor(ball2.y/(CELL+GAP));
-  if(r>=0&&r<rows&&c>=0&&c<cols&&bricks2[r][c]){bricks2[r][c]=null;ball2.vy*=-1;}}
+function bricksLeft() {
+  for (const row of bricks2) for (const cell of row) if (cell) return true;
+  return false;
+}
+function step2() {
+  ball2.x += ball2.vx; ball2.y += ball2.vy;
+  if (ball2.x < R || ball2.x > W - R) ball2.vx *= -1;
+  if (ball2.y < R) ball2.vy *= -1;
+  if (ball2.y > H) { ball2.x = W / 2; ball2.y = H - 60; }
+  pad2.x += Math.sign(ball2.x - (pad2.x + pad2.w / 2)) * pad2.s;
+  pad2.x = Math.max(0, Math.min(W - pad2.w, pad2.x));
+  if (ball2.y + R > pad2.y && ball2.x > pad2.x && ball2.x < pad2.x + pad2.w) ball2.vy = -Math.abs(ball2.vy);
+  const c = Math.floor(ball2.x / (CELL + GAP));
+  const r = Math.floor(ball2.y / (CELL + GAP));
+  if (r >= 0 && r < rows && c >= 0 && c < cols && bricks2[r][c]) {
+    bricks2[r][c] = null;
+    ball2.vy *= -1;
+  }
+}
+function draw2() {
+  ctx.fillStyle = "#0d1117"; ctx.fillRect(0, 0, W, H);
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (bricks2[r][c]) { ctx.fillStyle = bricks2[r][c]; ctx.fillRect(c*(CELL+GAP), r*(CELL+GAP), CELL, CELL); }
+  ctx.fillStyle = "#ff6a00"; ctx.beginPath(); ctx.arc(ball2.x, ball2.y, R, 0, 6.283); ctx.fill();
+  ctx.fillStyle = "#58a6ff"; ctx.fillRect(pad2.x, pad2.y, pad2.w, pad2.h);
+}
 
-function draw2(){ctx.fillStyle="#0d1117";ctx.fillRect(0,0,W,H);
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const col=bricks2[r][c];if(!col)continue;ctx.fillStyle=col;ctx.fillRect(c*(CELL+GAP),r*(CELL+GAP),CELL,CELL);}
-  ctx.fillStyle="#ff6a00";ctx.beginPath();ctx.arc(ball2.x,ball2.y,R,0,6.283);ctx.fill();
-  ctx.fillStyle="#58a6ff";ctx.fillRect(pad2.x,pad2.y,pad2.w,pad2.h);}
-
-for(let i=0;i<2000;i++){step2();draw2();enc.addFrame(ctx);}
+/* render until wall cleared OR 8k frames */
+for (let f = 0; f < 8000 && bricksLeft(); f++) {
+  step2(); draw2(); enc.addFrame(ctx);
+}
 enc.finish();
 await fs.writeFile("dist/breakout.gif", enc.out.getData());
-console.log("breakout.html & breakout.gif generated");
