@@ -107,7 +107,7 @@ function draw2() {
 }
 
 /* --- speed tuning --- */
-const SPEED_MULT = 4;    // 3‒6 is a good range; higher = faster
+const SPEED_MULT = 7;    // 3‒6 is a good range; higher = faster
 const FRAME_CAP  = 8000; // safety to keep file < 100 MB
 
 for (let f = 0; f < FRAME_CAP && bricksLeft(); f++) {
