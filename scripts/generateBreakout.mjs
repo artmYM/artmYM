@@ -106,9 +106,16 @@ function draw2() {
   ctx.fillStyle = "#58a6ff"; ctx.fillRect(pad2.x, pad2.y, pad2.w, pad2.h);
 }
 
-/* render until wall cleared OR 8k frames */
-for (let f = 0; f < 8000 && bricksLeft(); f++) {
-  step2(); draw2(); enc.addFrame(ctx);
+/* --- speed tuning --- */
+const SPEED_MULT = 4;    // 3‒6 is a good range; higher = faster
+const FRAME_CAP  = 8000; // safety to keep file < 100 MB
+
+for (let f = 0; f < FRAME_CAP && bricksLeft(); f++) {
+  /* advance physics SPEED_MULT times before we draw 1 frame */
+  for (let s = 0; s < SPEED_MULT; s++) step2();
+  draw2();
+  enc.addFrame(ctx);
 }
+
 enc.finish();
 await fs.writeFile("dist/breakout.gif", enc.out.getData());
