@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { request, gql } from "graphql-request";
-import { createCanvas } from "@napi-rs/canvas";
+import { createCanvas } from "canvas";
 import GIFEncoder from "gifencoder";
 
 /* ── env ─────────────────────────────────────────────────────────── */
