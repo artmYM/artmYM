@@ -62,10 +62,19 @@ await fs.mkdir("dist", { recursive: true });
 await fs.writeFile("dist/breakout.html", html, "utf8");
 
 /* ── 3. GIF output ───────────────────────────────────────────────── */
-const W=cv.width, H=cv.height;
-const canvas=createCanvas(W,H),ctx=canvas.getContext("2d");
-const enc=new GIFEncoder(W,H);enc.start();enc.setRepeat(0);enc.setDelay(30);enc.setQuality(10);
-const pad2={...pad},ball2={...ball},bricks2=grid.map(r=>r.slice());
+/* ── 3. GIF output ───────────────────────────────────────────────── */
+const CELL = 12, GAP = 2, R = 5;
+const W = cols * (CELL + GAP) - GAP;
+const H = rows * (CELL + GAP) - GAP + 60;
+
+const canvas = createCanvas(W, H);
+const ctx    = canvas.getContext("2d");
+const enc    = new GIFEncoder(W, H);
+enc.start(); enc.setRepeat(0); enc.setDelay(30); enc.setQuality(10);
+
+const pad2  = { w: 60, h: 10, x: W / 2 - 30, y: H - 30, s: 4 };
+const ball2 = { x: W / 2, y: H - 60, r: R, vx: 3, vy: -3 };
+const bricks2 = grid.map(r => r.slice());
 
 function step2(){ball2.x+=ball2.vx;ball2.y+=ball2.vy;
   if(ball2.x<R||ball2.x>W-R)ball2.vx*=-1;if(ball2.y<R)ball2.vy*=-1;if(ball2.y>H){ball2.x=W/2;ball2.y=H-60;ball2.vx=Math.random()>.5?3:-3;ball2.vy=-3;}
@@ -82,4 +91,4 @@ function draw2(){ctx.fillStyle="#0d1117";ctx.fillRect(0,0,W,H);
 for(let i=0;i<200;i++){step2();draw2();enc.addFrame(ctx);}
 enc.finish();
 await fs.writeFile("dist/breakout.gif", enc.out.getData());
-console.log("✅  breakout.html & breakout.gif generated");
+console.log("breakout.html & breakout.gif generated");
