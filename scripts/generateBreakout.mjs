@@ -70,7 +70,7 @@ const H = rows * (CELL + GAP) - GAP + 60;
 const canvas = createCanvas(W, H);
 const ctx    = canvas.getContext("2d");
 const enc    = new GIFEncoder(W, H);
-enc.start(); enc.setRepeat(0); enc.setDelay(30); enc.setQuality(10);
+enc.start(); enc.setRepeat(0); enc.setDelay(8); enc.setQuality(10);
 
 const pad2  = { w: 60, h: 10, x: W / 2 - 30, y: H - 30, s: 4 };
 const ball2 = { x: W / 2, y: H - 60, r: R, vx: 3, vy: -3 };
@@ -88,7 +88,7 @@ function draw2(){ctx.fillStyle="#0d1117";ctx.fillRect(0,0,W,H);
   ctx.fillStyle="#ff6a00";ctx.beginPath();ctx.arc(ball2.x,ball2.y,R,0,6.283);ctx.fill();
   ctx.fillStyle="#58a6ff";ctx.fillRect(pad2.x,pad2.y,pad2.w,pad2.h);}
 
-for(let i=0;i<200;i++){step2();draw2();enc.addFrame(ctx);}
+for(let i=0;i<2000;i++){step2();draw2();enc.addFrame(ctx);}
 enc.finish();
 await fs.writeFile("dist/breakout.gif", enc.out.getData());
 console.log("breakout.html & breakout.gif generated");
