@@ -1,11 +1,15 @@
 {
   "name": "github-breakout-generator",
-  "type": "module",
   "private": true,
-  "scripts": {
-    "build": "node scripts/generateBreakout.mjs"
-  },
+  "type": "module",
+  "scripts": { "build": "node scripts/generateBreakout.mjs" },
+
   "dependencies": {
-    "graphql-request": "^6.0.0"
+    "graphql-request": "^6.0.0",
+    "gifencoder": "^2.0.1"
+  },
+
+  "overrides": {
+    "canvas": "npm:@napi-rs/canvas@^0.1.0"
   }
 }
